@@ -1,0 +1,59 @@
+{
+  "name": "speak-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for text-to-speech generation with Gemini TTS",
+  "keywords": [
+    "mcp",
+    "tts",
+    "text-to-speech",
+    "gemini",
+    "voice",
+    "audio"
+  ],
+  "author": "mimo-3",
+  "mcpName": "io.github.mimo-3/speak-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mimo-3/speak-mcp.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "speak-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "scripts",
+    ".env.example",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE",
+    "server.json",
+    "!dist/**/*.map"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/tests/*.test.js",
+    "verify": "npm run build && npm test",
+    "prepublishOnly": "npm run verify"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "os": [
+    "darwin"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.mimo-3/speak-mcp",
+  "title": "Speak MCP",
+  "description": "MCP server for text-to-speech generation with Gemini TTS",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": "https://github.com/mimo-3/speak-mcp"
+}
