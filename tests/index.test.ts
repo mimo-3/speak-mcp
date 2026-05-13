@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { runSpeakText, type GeneratedAudio, type SpeakTextInput } from "../src/index.js";
+import { pathToFileURL } from "node:url";
+import { isEntrypoint, runSpeakText, type GeneratedAudio, type SpeakTextInput } from "../src/index.js";
 import { pcmToWav } from "../src/wav.js";
 
 const VOICE = "Zephyr" as const;
@@ -122,5 +123,60 @@ describe("runSpeakText", () => {
     assert.ok(!fs.existsSync(savedFilePath!));
 
     fs.rmSync(outputBaseDir, { recursive: true, force: true });
+  });
+});
+
+describe("isEntrypoint", () => {
+  it("returns true when argv[1] points at the module file directly", () => {
+    const tmpDir = freshSandbox();
+    const file = path.join(tmpDir, "entry.js");
+    fs.writeFileSync(file, "");
+    try {
+      assert.equal(isEntrypoint(file, pathToFileURL(file).href), true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns true when argv[1] is a symlink resolving to the module file (npx case)", () => {
+    const tmpDir = freshSandbox();
+    const file = path.join(tmpDir, "entry.js");
+    const symlinkPath = path.join(tmpDir, "bin-symlink");
+    fs.writeFileSync(file, "");
+    fs.symlinkSync(file, symlinkPath);
+    try {
+      assert.equal(isEntrypoint(symlinkPath, pathToFileURL(file).href), true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns false when argv[1] points at an unrelated existing file", () => {
+    const tmpDir = freshSandbox();
+    const file = path.join(tmpDir, "entry.js");
+    const other = path.join(tmpDir, "other.js");
+    fs.writeFileSync(file, "");
+    fs.writeFileSync(other, "");
+    try {
+      assert.equal(isEntrypoint(other, pathToFileURL(file).href), false);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns false (without throwing) when argv[1] does not exist", () => {
+    const tmpDir = freshSandbox();
+    const file = path.join(tmpDir, "entry.js");
+    const missing = path.join(tmpDir, "does-not-exist.js");
+    fs.writeFileSync(file, "");
+    try {
+      assert.equal(isEntrypoint(missing, pathToFileURL(file).href), false);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns false when argv[1] is empty", () => {
+    assert.equal(isEntrypoint("", pathToFileURL("/tmp/unused.js").href), false);
   });
 });
