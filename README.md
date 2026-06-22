@@ -127,6 +127,8 @@ The launcher sources `~/.zshrc` with stdout redirected away from the MCP protoco
 | `SPEAK_MCP_STYLE_PROMPT_FILE` | No | Path to a text file containing shared voice and delivery instructions. Used when `SPEAK_MCP_STYLE_PROMPT` is unset. |
 | `SPEAK_MCP_KEEP_AUDIO` | No | Set to `1` to keep generated files after playback by default. |
 | `SPEAK_MCP_DISABLE_PLAYBACK` | No | Set to `1` to save audio without playing it by default. |
+| `SPEAK_MCP_LOCK_PATH` | No | Path to the cross-process playback lock. Defaults to `<tmpdir>/speak-mcp/playback.lock`. Playback is serialised through this lock so concurrent calls never overlap; share the same path across processes to coordinate them. |
+| `SPEAK_MCP_MIC_BUSY_CMD` | No | Best-effort microphone guard (opt-in). A shell command run before playback: exit `0` means the mic is in use, so speech waits until it frees up (or a timeout elapses). Unset means no mic guard. |
 | `SPEAK_MCP_IRODORI_REPO` | Yes (for `provider: "irodori"`) | Path to a local Irodori-TTS checkout containing `infer.py`. Required when `provider: "irodori"` is used. |
 | `SPEAK_MCP_IRODORI_FRANCA_REF_WAV` | No | Optional override for the built-in `franca` reference WAV. |
 | `SPEAK_MCP_IRODORI_FRANCA_CHECKPOINT` | No | Optional override for the `franca` profile checkpoint. Must start with `Aratako/Irodori-TTS-`. |
@@ -272,6 +274,10 @@ Plays an existing generated audio file under `SPEAK_MCP_OUTPUT_DIR`.
 | `filePath` | `string` | Path to a generated audio file under `SPEAK_MCP_OUTPUT_DIR` |
 
 Playback currently uses `afplay`, so local playback is macOS-only. On Linux and Windows, audio generation works but playback is not yet supported. Set `SPEAK_MCP_DISABLE_PLAYBACK=1` (or pass `play: false` per call) to suppress playback attempts on those platforms.
+
+### Avoiding overlapping audio
+
+Playback is serialised through a small cross-process file lock (`SPEAK_MCP_LOCK_PATH`), so concurrent `speak_text`/`play_audio` calls queue instead of talking over each other. Optionally, set `SPEAK_MCP_MIC_BUSY_CMD` to a command that reports whether the microphone is in use (exit `0` = busy); when set, playback waits for the mic to free up before speaking, so the pet doesn't talk over a call or recording. The mic guard is best-effort and off unless configured.
 
 ## Why not the Live API?
 
