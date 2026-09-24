@@ -7,7 +7,7 @@ type ProviderEntry = {
 };
 
 const modelMap = new Map<string, ProviderEntry>();
-const GEMINI_MODEL_NAME = "gemini-3.1-flash-tts";
+const GEMINI_MODEL_NAME = "gemini-3.8-flash-tts";
 
 export function initRegistry(): string[] {
   modelMap.clear();
@@ -42,7 +42,7 @@ export function resolveModel(name: string): {
   speak: ProviderRegistration["speak"];
 } {
   const entry = modelMap.get(name);
-  if (!entry && name === GEMINI_MODEL_NAME) {
+  if (!entry && name.startsWith("gemini-")) {
     throw missingGeminiKeyError();
   }
   if (!entry) {
