@@ -24,6 +24,14 @@ export function extractInlineAudio(
   return data;
 }
 
+export function isWav(audio: Buffer): boolean {
+  return (
+    audio.length >= 12 &&
+    audio.toString("ascii", 0, 4) === "RIFF" &&
+    audio.toString("ascii", 8, 12) === "WAVE"
+  );
+}
+
 function summarizeGeminiError(err: unknown, modelId: string): string {
   const e = err as { name?: string; status?: number | string };
   const name = (e && typeof e.name === "string" && e.name) || "Error";
@@ -61,11 +69,12 @@ export function createGeminiProvider(apiKey: string): ProviderRegistration {
       throw new Error(`Failed to call Gemini TTS (model: ${params.modelId})`);
     }
 
-    const data = extractInlineAudio(response, params.modelId);
+    const audio = Buffer.from(extractInlineAudio(response, params.modelId), "base64");
 
     return {
-      audio: Buffer.from(data, "base64"),
-      containerFormat: "pcm",
+      audio,
+      // 3.1 returns headerless PCM; 3.8 returns WAV by default.
+      containerFormat: isWav(audio) ? "wav" : "pcm",
       sampleRate: 24_000,
       channels: 1,
       bitsPerSample: 16,
@@ -74,6 +83,8 @@ export function createGeminiProvider(apiKey: string): ProviderRegistration {
 
   return {
     models: {
+      "gemini-3.8-flash-tts": "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts": "gemini-3.8-flash-lite-tts",
       "gemini-3.1-flash-tts": "gemini-3.1-flash-tts-preview",
     },
     speak,
