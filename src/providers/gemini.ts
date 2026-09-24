@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { readWavMetadata } from "../wav.js";
 import type { ProviderRegistration, SpeakParams, SpeakResult } from "./types.js";
 
 type GenerateContentResponse = Awaited<
@@ -71,10 +72,14 @@ export function createGeminiProvider(apiKey: string): ProviderRegistration {
 
     const audio = Buffer.from(extractInlineAudio(response, params.modelId), "base64");
 
+    // 3.1 returns headerless 24kHz/mono/16-bit PCM; 3.8 returns WAV by default,
+    // so report the format its own header declares.
+    if (isWav(audio)) {
+      return { audio, containerFormat: "wav", ...readWavMetadata(audio) };
+    }
     return {
       audio,
-      // 3.1 returns headerless PCM; 3.8 returns WAV by default.
-      containerFormat: isWav(audio) ? "wav" : "pcm",
+      containerFormat: "pcm",
       sampleRate: 24_000,
       channels: 1,
       bitsPerSample: 16,
