@@ -10,7 +10,9 @@ An MCP server for text-to-speech generation using **Gemini TTS** and local **Iro
 
 | Name | Model ID | Best for |
 | ---- | -------- | -------- |
-| `gemini-3.1-flash-tts` | `gemini-3.1-flash-tts-preview` | Fast, controllable text-to-speech |
+| `gemini-3.8-flash-tts` | `gemini-3.8-flash-tts` | Default. Fast, controllable text-to-speech |
+| `gemini-3.8-flash-lite-tts` | `gemini-3.8-flash-lite-tts` | Cheaper, lighter text-to-speech |
+| `gemini-3.1-flash-tts` | `gemini-3.1-flash-tts-preview` | Previous generation |
 
 ### Irodori-TTS
 
@@ -140,7 +142,7 @@ The launcher sources `~/.zshrc` with stdout redirected away from the MCP protoco
 | `text` | `string` (1-32,000 chars) | - | Text to synthesize |
 | `provider` | `"gemini"` or `"irodori"` | `"gemini"` | Speech provider |
 | `mode` | `"reference"` or `"voice_design"` | inferred | Irodori mode |
-| `model` | `"gemini-3.1-flash-tts"` | `"gemini-3.1-flash-tts"` | TTS model to use |
+| `model` | `"gemini-3.8-flash-tts"`, `"gemini-3.8-flash-lite-tts"`, or `"gemini-3.1-flash-tts"` | `"gemini-3.8-flash-tts"` | TTS model to use |
 | `voice` | Gemini voice name | `SPEAK_MCP_DEFAULT_VOICE` or `"Zephyr"` | Prebuilt voice name |
 | `outputDir` | `string` | `"."` | Directory where audio will be saved, relative to `SPEAK_MCP_OUTPUT_DIR` |
 | `play` | `boolean` | `true` | Play the generated audio after saving it |
@@ -247,7 +249,7 @@ Returns a JSON object:
 
 ```json
 {
-  "model": "gemini-3.1-flash-tts-preview",
+  "model": "gemini-3.8-flash-tts",
   "voice": "Zephyr",
   "savedFile": "/path/to/audio/1760000000000-ab12cd34.wav",
   "savedFiles": ["/path/to/audio/1760000000000-ab12cd34.wav"],

@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { readWavMetadata } from "../wav.js";
 import type { ProviderRegistration, SpeakParams, SpeakResult } from "./types.js";
 
 type GenerateContentResponse = Awaited<
@@ -22,6 +23,14 @@ export function extractInlineAudio(
     throw new Error(`No inline audio data returned by ${modelId}`);
   }
   return data;
+}
+
+export function isWav(audio: Buffer): boolean {
+  return (
+    audio.length >= 12 &&
+    audio.toString("ascii", 0, 4) === "RIFF" &&
+    audio.toString("ascii", 8, 12) === "WAVE"
+  );
 }
 
 function summarizeGeminiError(err: unknown, modelId: string): string {
@@ -61,10 +70,15 @@ export function createGeminiProvider(apiKey: string): ProviderRegistration {
       throw new Error(`Failed to call Gemini TTS (model: ${params.modelId})`);
     }
 
-    const data = extractInlineAudio(response, params.modelId);
+    const audio = Buffer.from(extractInlineAudio(response, params.modelId), "base64");
 
+    // 3.1 returns headerless 24kHz/mono/16-bit PCM; 3.8 returns WAV by default,
+    // so report the format its own header declares.
+    if (isWav(audio)) {
+      return { audio, containerFormat: "wav", ...readWavMetadata(audio) };
+    }
     return {
-      audio: Buffer.from(data, "base64"),
+      audio,
       containerFormat: "pcm",
       sampleRate: 24_000,
       channels: 1,
@@ -74,6 +88,8 @@ export function createGeminiProvider(apiKey: string): ProviderRegistration {
 
   return {
     models: {
+      "gemini-3.8-flash-tts": "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts": "gemini-3.8-flash-lite-tts",
       "gemini-3.1-flash-tts": "gemini-3.1-flash-tts-preview",
     },
     speak,

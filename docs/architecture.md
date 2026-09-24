@@ -38,7 +38,7 @@ MCP client
 Inputs:
 
 - `text`: text to synthesize
-- `model`: public model alias, currently `gemini-3.1-flash-tts`
+- `model`: public model alias, `gemini-3.8-flash-tts` by default (also `gemini-3.8-flash-lite-tts` and `gemini-3.1-flash-tts`)
 - `voice`: Gemini prebuilt voice, defaulting to `Zephyr` unless `SPEAK_MCP_DEFAULT_VOICE` is set
 - `outputDir`: sandboxed relative output directory
 - `play`: whether to play the generated audio after saving it, defaulting to `true`
